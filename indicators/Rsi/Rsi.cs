@@ -42,15 +42,13 @@ namespace Skender.Stock.Indicators
             List<RsiResult> results = new(size);
             decimal[] gain = new decimal[size]; // gain
             decimal[] loss = new decimal[size]; // loss
+            decimal? rsi;
 
             // roll through quotes
             for (int i = 0; i < bdList.Count; i++)
             {
                 BasicData h = bdList[i];
                 int index = i + 1;
-
-                RsiResult r;
-                r.Date = h.Date;
 
                 gain[i] = (h.Value > lastValue) ? h.Value - lastValue : 0;
                 loss[i] = (h.Value < lastValue) ? lastValue - h.Value : 0;
@@ -65,11 +63,11 @@ namespace Skender.Stock.Indicators
                     if (avgLoss > 0)
                     {
                         decimal rs = avgGain / avgLoss;
-                        r.Rsi = 100 - (100 / (1 + rs));
+                        rsi = 100 - (100 / (1 + rs));
                     }
                     else
                     {
-                        r.Rsi = 100;
+                        rsi = 100;
                     }
                 }
 
@@ -87,15 +85,16 @@ namespace Skender.Stock.Indicators
                     avgGain = sumGain / lookbackPeriods;
                     avgLoss = sumLoss / lookbackPeriods;
 
-                    r.Rsi = (avgLoss > 0) ? 100 - (100 / (1 + (avgGain / avgLoss))) : 100;
+                    rsi = (avgLoss > 0) ? 100 - (100 / (1 + (avgGain / avgLoss))) : 100;
                 }
 
                 // warmup period
                 else
                 {
-                    r.Rsi = null;
+                    rsi = null;
                 }
 
+                RsiResult r = new(h.Date, rsi);
                 results.Add(r);
             }
 
