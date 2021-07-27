@@ -65,20 +65,6 @@ namespace Internal.Tests
         }
 
         [TestMethod]
-        public void Removed()
-        {
-            List<RsiResult> results = quotes.GetRsi(14)
-                .RemoveWarmupPeriods()
-                .ToList();
-
-            // assertions
-            Assert.AreEqual(502 - (10 * 14), results.Count);
-
-            RsiResult last = results.LastOrDefault();
-            Assert.AreEqual(42.0773m, Math.Round((decimal)last.Rsi, 4));
-        }
-
-        [TestMethod]
         public void Exceptions()
         {
             // bad lookback period

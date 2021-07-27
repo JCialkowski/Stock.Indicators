@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Skender.Stock.Indicators
 {
@@ -9,7 +8,11 @@ namespace Skender.Stock.Indicators
         // RELATIVE STRENGTH INDEX
         /// <include file='./info.xml' path='indicator/*' />
         /// 
-        public static IEnumerable<RsiResult> GetRsi<TQuote>(
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Design",
+            "CA1002:Do not expose generic lists",
+            Justification = "Just testing an idea")]
+        public static List<RsiResult> GetRsi<TQuote>(
             this IEnumerable<TQuote> quotes,
             int lookbackPeriods = 14)
             where TQuote : IQuote
@@ -20,20 +23,6 @@ namespace Skender.Stock.Indicators
 
             // calculate
             return CalcRsi(bdList, lookbackPeriods);
-        }
-
-
-        // remove recommended periods
-        /// <include file='../_Common/Results/info.xml' path='info/type[@name="Prune"]/*' />
-        ///
-        public static IEnumerable<RsiResult> RemoveWarmupPeriods(
-            this IEnumerable<RsiResult> results)
-        {
-            int n = results
-                .ToList()
-                .FindIndex(x => x.Rsi != null);
-
-            return results.Remove(10 * n);
         }
 
 
@@ -60,11 +49,8 @@ namespace Skender.Stock.Indicators
                 BasicData h = bdList[i];
                 int index = i + 1;
 
-                RsiResult r = new()
-                {
-                    Date = h.Date
-                };
-                results.Add(r);
+                RsiResult r;
+                r.Date = h.Date;
 
                 gain[i] = (h.Value > lastValue) ? h.Value - lastValue : 0;
                 loss[i] = (h.Value < lastValue) ? lastValue - h.Value : 0;
@@ -103,6 +89,14 @@ namespace Skender.Stock.Indicators
 
                     r.Rsi = (avgLoss > 0) ? 100 - (100 / (1 + (avgGain / avgLoss))) : 100;
                 }
+
+                // warmup period
+                else
+                {
+                    r.Rsi = null;
+                }
+
+                results.Add(r);
             }
 
             return results;
