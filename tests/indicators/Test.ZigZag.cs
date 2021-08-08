@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 using Skender.Stock.Indicators;
 
 namespace Internal.Tests
@@ -157,5 +159,48 @@ namespace Internal.Tests
             Assert.ThrowsException<BadQuotesException>(() =>
                 Indicator.GetZigZag(TestData.GetDefault(1)));
         }
+
+        // See Issue #510
+        [TestMethod]
+        public void Issue510()
+        {
+            string json = File.ReadAllText("data/issue510.json");
+            dynamic data = JsonConvert.DeserializeObject(json);
+
+            List<Quote> quotes = new();
+
+            foreach (dynamic d in data)
+            {
+                dynamic q = d.QuotesIndicators;
+                Quote quote = new()
+                {
+                    Date = q.Date,
+                    Open = q.Open,
+                    High = q.High,
+                    Low = q.Low,
+                    Close = q.Close
+                };
+
+                quotes.Add(quote);
+            }
+
+            int size = quotes.Count;
+            List<ZigZagResult> results1 = quotes.GetZigZag(EndType.HighLow, 1).ToList();
+            List<ZigZagResult> results10 = quotes.GetZigZag(EndType.HighLow, 10).ToList();
+            List<Quote> quotesList = quotes.OrderBy(x => x.Date).ToList();
+
+            for (int i = 0; i < size; i++)
+            {
+                Quote q = quotesList[i];
+                ZigZagResult r10 = results10[i];
+                ZigZagResult r1 = results1[i];
+
+                Console.WriteLine("{0},{1:N5},{2:N5},{3:N5},{4:N5},{5:N5},{6:N5}",
+                    q.Date, q.Open, q.High, q.Low, q.Close, r1.ZigZag, r10.ZigZag);
+            }
+
+            Assert.Fail();
+        }
+
     }
 }

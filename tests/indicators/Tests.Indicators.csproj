@@ -50,6 +50,9 @@
     <None Update="data\intraday.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="data\issue510.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="data\longest.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
