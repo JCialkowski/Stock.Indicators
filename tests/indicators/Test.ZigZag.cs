@@ -164,7 +164,7 @@ namespace Internal.Tests
         [TestMethod]
         public void Issue510()
         {
-            string json = File.ReadAllText("data/issue510.json");
+            string json = File.ReadAllText("data/issue510-B.json");
             dynamic data = JsonConvert.DeserializeObject(json);
 
             List<Quote> quotes = new();
