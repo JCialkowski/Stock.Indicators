@@ -8,7 +8,7 @@ namespace Skender.Stock.Indicators
     {
         // RELATIVE STRENGTH INDEX
         /// <include file='./info.xml' path='indicator/*' />
-        /// 
+        ///
         public static IEnumerable<RsiResult> GetRsi<TQuote>(
             this IEnumerable<TQuote> quotes,
             int lookbackPeriods = 14)
@@ -66,6 +66,11 @@ namespace Skender.Stock.Indicators
                 };
                 results.Add(r);
 
+                if (h.Date.Day == 24)
+                {
+
+                }
+
                 gain[i] = (h.Value > lastValue) ? h.Value - lastValue : 0;
                 loss[i] = (h.Value < lastValue) ? lastValue - h.Value : 0;
                 lastValue = h.Value;
@@ -102,6 +107,10 @@ namespace Skender.Stock.Indicators
                     avgLoss = sumLoss / lookbackPeriods;
 
                     r.Rsi = (avgLoss > 0) ? 100 - (100 / (1 + (avgGain / avgLoss))) : 100;
+                }
+                if (r.Rsi.HasValue&&Math.Round(r.Rsi.Value, 6) == 68.808531M)
+                {
+
                 }
             }
 

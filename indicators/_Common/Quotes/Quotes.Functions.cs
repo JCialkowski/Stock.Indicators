@@ -14,7 +14,7 @@ namespace Skender.Stock.Indicators
 
         // validation
         /// <include file='./info.xml' path='info/type[@name="Validate"]/*' />
-        /// 
+        ///
         public static IEnumerable<TQuote> Validate<TQuote>(this IEnumerable<TQuote> quotes)
             where TQuote : IQuote
         {
@@ -42,13 +42,12 @@ namespace Skender.Stock.Indicators
 
         // aggregation (quantization)
         /// <include file='./info.xml' path='info/type[@name="Aggregate"]/*' />
-        /// 
+        ///
         public static IEnumerable<Quote> Aggregate<TQuote>(
             this IEnumerable<TQuote> quotes,
             PeriodSize newSize)
             where TQuote : IQuote
         {
-
             // handle no quotes scenario
             if (quotes == null || !quotes.Any())
             {
@@ -67,17 +66,17 @@ namespace Skender.Stock.Indicators
 
             // return aggregation
             return quotes
-                    .OrderBy(x => x.Date)
-                    .GroupBy(x => x.Date.RoundDown(newPeriod))
-                    .Select(x => new Quote
-                    {
-                        Date = x.Key,
-                        Open = x.First().Open,
-                        High = x.Max(t => t.High),
-                        Low = x.Min(t => t.Low),
-                        Close = x.Last().Close,
-                        Volume = x.Sum(t => t.Volume)
-                    });
+                .OrderBy(x => x.Date)
+                .GroupBy(x => x.Date.RoundDown(newPeriod))
+                .Select(x => new Quote
+                {
+                    Date = x.Key,
+                    Open = x.First().Open,
+                    High = x.Max(t => t.High),
+                    Low = x.Min(t => t.Low),
+                    Close = x.Last().Close,
+                    Volume = x.Sum(t => t.Volume)
+                });
         }
 
         // sort
@@ -92,7 +91,20 @@ namespace Skender.Stock.Indicators
                 : quotesList;
         }
 
+
         // convert to basic
+        internal static BasicData ConvertToBasic<TQuote>(
+            this TQuote x, string element = "C")
+            where TQuote : IQuote => element switch
+        {
+            "O" => new BasicData { Date = x.Date, Value = x.Open },
+            "H" => new BasicData { Date = x.Date, Value = x.High },
+            "L" => new BasicData { Date = x.Date, Value = x.Low },
+            "C" => new BasicData { Date = x.Date, Value = x.Close },
+            "V" => new BasicData { Date = x.Date, Value = x.Volume },
+            _ => null,
+        };
+
         internal static List<BasicData> ConvertToBasic<TQuote>(
             this IEnumerable<TQuote> quotes, string element = "C")
             where TQuote : IQuote
@@ -116,6 +128,5 @@ namespace Skender.Stock.Indicators
                 ? throw new BadQuotesException(nameof(quotes), "No historical quotes provided.")
                 : bdList;
         }
-
     }
 }

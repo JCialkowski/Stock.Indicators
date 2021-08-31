@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Skender.Stock.Indicators;
 
@@ -9,7 +10,6 @@ namespace Internal.Tests
     [TestClass]
     public class Rsi : TestBase
     {
-
         [TestMethod]
         public void Standard()
         {
@@ -34,6 +34,34 @@ namespace Internal.Tests
 
             RsiResult r4 = results[501];
             Assert.AreEqual(42.0773m, Math.Round((decimal)r4.Rsi, 4));
+        }
+
+        [TestMethod]
+        public async Task Async()
+        {
+            List<RsiResult> results = quotes.GetRsi(14).ToList();
+
+            var rsi = RsiIndicator.Create(14);
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(100);
+                foreach (var quote in quotes.OrderBy(x=>x.Date))
+                {
+                    rsi.AddQuote(quote);
+                }
+            }).ConfigureAwait(false);
+            var res = new List<RsiResult>();
+            await foreach (var r in rsi)
+            {
+                res.Add(r);
+                Assert.AreEqual(results[res.Count-1].Rsi, r.Rsi, r.Date.ToString());
+                if (results.Last()?.Date==r.Date)
+                {
+                    rsi.Dispose();
+                }
+            }
+
+            Assert.AreEqual(results.Count, res.Count);
         }
 
         [TestMethod]

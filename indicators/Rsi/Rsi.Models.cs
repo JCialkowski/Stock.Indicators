@@ -6,5 +6,6 @@ namespace Skender.Stock.Indicators
     public class RsiResult : ResultBase
     {
         public decimal? Rsi { get; set; }
+
     }
 }
